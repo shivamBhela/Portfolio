@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  --color-spidey-red: #b11313;
+  --color-spidey-blue: #003767;
+  --color-spidey-black: #000000;
+  --color-spidey-glow: #ff0000;
+  --color-electric-blue: #00f2ff;
+
+  --font-marvel: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  color-scheme: dark;
+  background-color: #000;
+  color: #fff;
+  cursor: auto;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: black;
+  font-family: var(--font-marvel);
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.glowing-text {
+  text-shadow:
+    0 0 10px rgba(255, 0, 0, 0.8),
+    0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+/* Modern card: Apple/Stripe-style */
+.holographic-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.holographic-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Portrait card: holographic shimmer + hover glow */
+.portrait-card {
+  animation: portrait-float 6s ease-in-out infinite;
+}
+.portrait-card:hover {
+  box-shadow:
+    0 0 20px rgba(177, 19, 19, 0.3),
+    0 0 40px rgba(0, 242, 255, 0.15),
+    0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.portrait-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(0, 242, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(177, 19, 19, 0.15) 75%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: holographic-shimmer 4s ease-in-out infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+@keyframes portrait-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes holographic-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+.animate-scan {
+  animation: scan 2s ease-in-out 1;
+}
