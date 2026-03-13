@@ -15,7 +15,8 @@ const INITIAL_DATA = {
     ],
     heroTitle: 'Hello Everyone',
     heroSubtitle: 'I am Shivam Bhela | AI & Hardware Developer',
-    heroImage: ASSETS.images.hero
+    heroImage: ASSETS.images.heroCinematic,
+    profileImage: ASSETS.images.profile,
   },
   projects: [
     {
@@ -62,15 +63,65 @@ const INITIAL_DATA = {
     }
   ],
   skills: [
-    { id: 'ai', title: 'AI / ML', items: ['Generative AI', 'Machine Learning', 'Speech Recognition', 'NLP', 'Computer Vision'], color: '#ff0000' },
-    { id: 'programming', title: 'Programming', items: ['C++', 'Python', 'JavaScript', 'TypeScript'], color: '#00f2ff' }
+    {
+      id: 'ai',
+      title: 'AI / ML',
+      icon: '🧠',
+      items: ['Generative AI', 'Machine Learning', 'Speech Recognition', 'NLP', 'Computer Vision'],
+      color: '#ff0000'
+    },
+    {
+      id: 'programming',
+      title: 'Programming',
+      icon: '💻',
+      items: ['C++', 'Python', 'JavaScript', 'TypeScript'],
+      color: '#00f2ff'
+    },
+    {
+      id: 'hardware',
+      title: 'Hardware',
+      icon: '⚙️',
+      items: ['Arduino', 'Sensors', 'EEG Interfaces', 'Embedded Systems', 'IoT', 'Robotics'],
+      color: '#ffaa00'
+    },
+    {
+      id: 'fullstack',
+      title: 'Web Development',
+      icon: '🌐',
+      items: ['React', 'HTML', 'CSS', 'Tailwind', 'Node.js', 'Next.js'],
+      color: '#003767'
+    },
+    {
+      id: 'research',
+      title: 'Research',
+      icon: '📑',
+      items: ['Brain-computer interfaces', 'Neural Signals', 'Signal Processing', 'Scientific Writing'],
+      color: '#ffffff'
+    }
   ]
 };
 
 export const usePortfolioData = () => {
   const [data, setData] = useState(() => {
-    const saved = localStorage.getItem('shivam_portfolio_data');
-    return saved ? JSON.parse(saved) : INITIAL_DATA;
+    try {
+      const saved = localStorage.getItem('shivam_portfolio_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Migrate old data — ensure profileImage & heroImage exist
+        if (!parsed.about.profileImage) {
+          parsed.about.profileImage = ASSETS.images.profile;
+        }
+        if (!parsed.about.heroImage) {
+          parsed.about.heroImage = ASSETS.images.heroCinematic;
+        }
+        // Migrate skills — ensure icon field exists
+        if (parsed.skills && parsed.skills.length > 0 && !parsed.skills[0].icon) {
+          parsed.skills = INITIAL_DATA.skills;
+        }
+        return parsed;
+      }
+    } catch { /* ignore parse errors */ }
+    return INITIAL_DATA;
   });
 
   useEffect(() => {

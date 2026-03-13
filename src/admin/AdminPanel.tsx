@@ -15,15 +15,26 @@ const Field = ({ label, value, onChange, type = 'text', rows }: any) => (
 );
 
 // ─── Upload label ─────────────────────────────────────────────────────────────
-const ImageUploadLabel = ({ src, onChange }: { src?: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
-  <div className="w-32 h-20 bg-white/10 rounded overflow-hidden relative group">
-    {src ? <img src={src} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] text-white/20">NO IMG</div>}
-    <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity text-[10px] font-bold">
-      UPLOAD
-      <input type="file" className="hidden" accept="image/*" onChange={onChange} />
-    </label>
-  </div>
-);
+const ImageUploadLabel = ({ src, onChange, size = 'md' }: { src?: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; size?: 'sm' | 'md' | 'lg' }) => {
+  const dims = size === 'lg' ? 'w-40 h-48' : size === 'md' ? 'w-32 h-20' : 'w-20 h-20';
+  return (
+    <div className={`${dims} bg-white/10 rounded-xl overflow-hidden relative group border border-white/10`}>
+      {src ? (
+        <img src={src} className="w-full h-full object-cover" alt="preview" />
+      ) : (
+        <div className="w-full h-full flex flex-col items-center justify-center text-[10px] text-white/20 gap-1">
+          <span className="text-2xl">📷</span>
+          <span>NO IMAGE</span>
+        </div>
+      )}
+      <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity text-[10px] font-bold flex-col gap-1">
+        <span className="text-xl">↑</span>
+        <span>UPLOAD</span>
+        <input type="file" className="hidden" accept="image/*" onChange={onChange} />
+      </label>
+    </div>
+  );
+};
 
 // ─── Section Header with Add button ──────────────────────────────────────────
 const SectionHeader = ({ title, accent, onAdd }: { title: string; accent: string; onAdd: () => void }) => (
@@ -48,13 +59,16 @@ const SaveBar = ({ onSave, onClear, saved }: { onSave: () => void; onClear: () =
   </div>
 );
 
+type TabId = 'overview' | 'hero' | 'about' | 'projects' | 'hackathons' | 'certificates' | 'research' | 'skills';
+
 // ─── AdminPanel ───────────────────────────────────────────────────────────────
 const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'hero' | 'about' | 'projects' | 'hackathons' | 'certificates' | 'research'>('overview');
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [savedFlag, setSavedFlag] = useState(false);
+  const [newSkillInput, setNewSkillInput] = useState<Record<string, string>>({});
 
   const { data, addItem, removeItem, editItem, updateSection } = usePortfolioData();
 
@@ -74,7 +88,6 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   const triggerSave = () => {
     setSavedFlag(true);
     setTimeout(() => setSavedFlag(false), 2500);
-    // Data is already auto-saved to localStorage via usePortfolioData hook
   };
 
   const triggerClear = () => {
@@ -84,14 +97,55 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     }
   };
 
-  const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'hero', label: 'Hero Section' },
-    { id: 'about', label: 'About' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'hackathons', label: 'Hackathons' },
-    { id: 'certificates', label: 'Certificates' },
-    { id: 'research', label: 'Research' },
+  // ── Skills helpers ──────────────────────────────────────────────────────────
+  const addSkillToCategory = (catId: string) => {
+    const text = (newSkillInput[catId] || '').trim();
+    if (!text) return;
+    const updatedSkills = data.skills.map((cat: any) =>
+      cat.id === catId ? { ...cat, items: [...(cat.items || []), text] } : cat
+    );
+    updateSection('skills', updatedSkills);
+    setNewSkillInput(prev => ({ ...prev, [catId]: '' }));
+  };
+
+  const removeSkillFromCategory = (catId: string, skill: string) => {
+    const updatedSkills = data.skills.map((cat: any) =>
+      cat.id === catId ? { ...cat, items: cat.items.filter((s: string) => s !== skill) } : cat
+    );
+    updateSection('skills', updatedSkills);
+  };
+
+  const editSkillCategory = (catId: string, updates: any) => {
+    const updatedSkills = data.skills.map((cat: any) =>
+      cat.id === catId ? { ...cat, ...updates } : cat
+    );
+    updateSection('skills', updatedSkills);
+  };
+
+  const addSkillCategory = () => {
+    const newCat = {
+      id: `cat_${Date.now()}`,
+      title: 'New Category',
+      icon: '⚡',
+      items: [],
+      color: '#ffffff'
+    };
+    updateSection('skills', [...data.skills, newCat]);
+  };
+
+  const removeSkillCategory = (catId: string) => {
+    updateSection('skills', data.skills.filter((cat: any) => cat.id !== catId));
+  };
+
+  const tabs: { id: TabId; label: string; icon: string }[] = [
+    { id: 'overview',     label: 'Overview',        icon: '📊' },
+    { id: 'hero',         label: 'Hero Section',     icon: '🖼️' },
+    { id: 'about',        label: 'About',            icon: '👤' },
+    { id: 'projects',     label: 'Projects',         icon: '🚀' },
+    { id: 'hackathons',   label: 'Hackathons',       icon: '🏆' },
+    { id: 'certificates', label: 'Certificates',     icon: '📜' },
+    { id: 'research',     label: 'Research',         icon: '🔬' },
+    { id: 'skills',       label: 'Skill Network',    icon: '🕸️' },
   ];
 
   return (
@@ -107,6 +161,7 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <button onClick={onClose} className="absolute top-4 right-4 z-50 text-white/40 hover:text-white bg-black/50 w-8 h-8 rounded-full flex items-center justify-center">✕</button>
 
             {!isAuthenticated ? (
+              /* ── Login ─────────────────────────────────────────────────── */
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center space-y-8 w-full max-w-xs">
                   <div>
@@ -131,28 +186,31 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               </div>
             ) : (
               <div className="flex-1 flex overflow-hidden">
-                {/* Sidebar */}
-                <div className="w-56 shrink-0 border-r border-white/10 bg-white/5 p-5 flex flex-col justify-between">
+                {/* ── Sidebar ──────────────────────────────────────────────── */}
+                <div className="w-52 shrink-0 border-r border-white/10 bg-white/5 p-4 flex flex-col justify-between">
                   <div>
                     <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-4">Management</h3>
                     <div className="space-y-1">
                       {tabs.map(tab => (
                         <button
                           key={tab.id}
-                          onClick={() => setActiveTab(tab.id as any)}
-                          className={`w-full text-left px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-spidey-red text-white' : 'hover:bg-white/5 text-white/60'}`}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`w-full text-left px-3 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${
+                            activeTab === tab.id ? 'bg-spidey-red text-white' : 'hover:bg-white/5 text-white/60'
+                          }`}
                         >
+                          <span className="text-sm">{tab.icon}</span>
                           {tab.label}
                         </button>
                       ))}
                     </div>
                   </div>
-                  <button onClick={() => setIsAuthenticated(false)} className="w-full text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white/20 hover:text-spidey-red transition-colors">
+                  <button onClick={() => setIsAuthenticated(false)} className="w-full text-left px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white/20 hover:text-spidey-red transition-colors">
                     Terminate Session
                   </button>
                 </div>
 
-                {/* Content */}
+                {/* ── Content ──────────────────────────────────────────────── */}
                 <div className="flex-1 overflow-y-auto p-8 bg-black/40 space-y-6">
 
                   {/* ── Overview ─────────────────────────────────────────── */}
@@ -161,11 +219,12 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                       <h2 className="text-2xl font-black uppercase tracking-tight">System <span className="text-spidey-red">Dashboard</span></h2>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {[
-                          { label: 'Projects', value: data.projects.length },
-                          { label: 'Hackathons', value: data.hackathons.length },
-                          { label: 'Certificates', value: data.certificates.length },
-                          { label: 'Research Papers', value: data.research.length },
-                          { label: 'Skills', value: data.skills.length },
+                          { label: 'Projects',       value: data.projects?.length ?? 0 },
+                          { label: 'Hackathons',      value: data.hackathons?.length ?? 0 },
+                          { label: 'Certificates',    value: data.certificates?.length ?? 0 },
+                          { label: 'Research Papers', value: data.research?.length ?? 0 },
+                          { label: 'Skill Categories',value: data.skills?.length ?? 0 },
+                          { label: 'Total Skills',    value: (data.skills || []).reduce((acc: number, c: any) => acc + (c.items?.length ?? 0), 0) },
                         ].map(stat => (
                           <div key={stat.label} className="bg-white/5 p-6 rounded-xl border border-white/10">
                             <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{stat.label}</p>
@@ -181,18 +240,40 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 
                   {/* ── Hero ─────────────────────────────────────────────── */}
                   {activeTab === 'hero' && (
-                    <div className="space-y-5 max-w-2xl">
+                    <div className="space-y-6 max-w-2xl">
                       <h3 className="text-xl font-black uppercase tracking-tight">Hero <span className="text-spidey-red">Interface</span></h3>
-                      <div className="flex gap-6 items-start">
-                        <div className="w-40 h-24 bg-white/5 rounded overflow-hidden relative group">
-                          {data.about.heroImage && <img src={data.about.heroImage} className="w-full h-full object-cover" />}
-                          <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity text-[10px] font-bold">
-                            UPLOAD
-                            <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, url => updateSection('about', { ...data.about, heroImage: url }))} />
-                          </label>
+
+                      {/* Profile Portrait */}
+                      <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
+                        <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Profile Portrait Photo</p>
+                        <p className="text-[10px] text-white/30">This is the photo shown in the intro animation when visitors first open your portfolio.</p>
+                        <div className="flex gap-6 items-start">
+                          <ImageUploadLabel
+                            src={data.about.profileImage}
+                            size="lg"
+                            onChange={e => handleImageUpload(e, url => updateSection('about', { ...data.about, profileImage: url }))}
+                          />
+                          <div className="text-[10px] text-white/30 space-y-2 mt-2">
+                            <p>✓ Hover the image and click to upload</p>
+                            <p>✓ Accepts JPG, PNG, WEBP</p>
+                            <p>✓ Updates intro animation immediately</p>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-white/40 uppercase tracking-widest leading-relaxed">Upload the portrait image for the Hero section.</p>
                       </div>
+
+                      {/* Hero Cinematic Background */}
+                      <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
+                        <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Hero Cinematic Background</p>
+                        <p className="text-[10px] text-white/30">The full-width background image behind the hero text.</p>
+                        <div className="flex gap-6 items-start">
+                          <ImageUploadLabel
+                            src={data.about.heroImage}
+                            size="md"
+                            onChange={e => handleImageUpload(e, url => updateSection('about', { ...data.about, heroImage: url }))}
+                          />
+                        </div>
+                      </div>
+
                       <Field label="Main Greeting" value={data.about.heroTitle || 'Hello Everyone'} onChange={(e: any) => updateSection('about', { ...data.about, heroTitle: e.target.value })} />
                       <Field label="Sub-headline" value={data.about.heroSubtitle || data.about.title} onChange={(e: any) => updateSection('about', { ...data.about, heroSubtitle: e.target.value })} rows={3} />
                       <SaveBar onSave={triggerSave} onClear={triggerClear} saved={savedFlag} />
@@ -298,6 +379,117 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                           <textarea value={res.abstract} placeholder="Abstract / Summary" onChange={e => editItem('research', res.id, { ...res, abstract: e.target.value })} rows={3} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-xs focus:outline-none focus:border-electric-blue" />
                         </div>
                       ))}
+                      <SaveBar onSave={triggerSave} onClear={triggerClear} saved={savedFlag} />
+                    </div>
+                  )}
+
+                  {/* ── Skill Web Network ─────────────────────────────────── */}
+                  {activeTab === 'skills' && (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-black uppercase tracking-tight">
+                          Skill <span className="text-spidey-red">Web Network</span>
+                        </h3>
+                        <button
+                          onClick={addSkillCategory}
+                          className="bg-electric-blue text-black text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded hover:opacity-90 transition"
+                        >
+                          + Add Category
+                        </button>
+                      </div>
+
+                      <p className="text-[10px] text-white/30 uppercase tracking-widest mb-6">
+                        Each category appears as a node in the Skill Web Network on your portfolio. You can add/remove categories and individual skills within each.
+                      </p>
+
+                      {(data.skills || []).map((cat: any) => (
+                        <div key={cat.id} className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
+                          {/* Category header row */}
+                          <div className="flex items-center gap-3">
+                            {/* Icon input */}
+                            <input
+                              type="text"
+                              value={cat.icon || '⚡'}
+                              onChange={e => editSkillCategory(cat.id, { icon: e.target.value })}
+                              className="w-12 text-center text-2xl bg-white/10 border border-white/10 rounded-lg py-1 focus:outline-none focus:border-electric-blue"
+                              title="Category icon (emoji)"
+                            />
+                            {/* Title */}
+                            <input
+                              type="text"
+                              value={cat.title}
+                              onChange={e => editSkillCategory(cat.id, { title: e.target.value })}
+                              className="flex-1 bg-transparent text-base font-bold focus:outline-none border-b border-transparent focus:border-electric-blue transition-all"
+                              placeholder="Category Name"
+                            />
+                            {/* Color picker */}
+                            <div className="flex items-center gap-2">
+                              <label className="text-[10px] text-white/30 uppercase">Color</label>
+                              <input
+                                type="color"
+                                value={cat.color || '#ffffff'}
+                                onChange={e => editSkillCategory(cat.id, { color: e.target.value })}
+                                className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
+                                title="Node color"
+                              />
+                            </div>
+                            <button
+                              onClick={() => removeSkillCategory(cat.id)}
+                              className="text-spidey-red text-[10px] font-bold uppercase shrink-0 hover:text-red-400 transition-colors"
+                            >
+                              Delete Category
+                            </button>
+                          </div>
+
+                          {/* Existing skills as tags */}
+                          <div className="flex flex-wrap gap-2 min-h-[32px]">
+                            {(cat.items || []).map((skill: string) => (
+                              <span
+                                key={skill}
+                                className="flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/10 rounded-full text-xs group hover:border-spidey-red/50 transition-colors"
+                              >
+                                {skill}
+                                <button
+                                  onClick={() => removeSkillFromCategory(cat.id, skill)}
+                                  className="text-white/30 hover:text-spidey-red transition-colors font-bold text-[10px] leading-none"
+                                  title="Remove skill"
+                                >
+                                  ✕
+                                </button>
+                              </span>
+                            ))}
+                            {(cat.items || []).length === 0 && (
+                              <span className="text-[10px] text-white/20 italic">No skills added yet</span>
+                            )}
+                          </div>
+
+                          {/* Add new skill input */}
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={newSkillInput[cat.id] || ''}
+                              onChange={e => setNewSkillInput(prev => ({ ...prev, [cat.id]: e.target.value }))}
+                              onKeyPress={e => e.key === 'Enter' && addSkillToCategory(cat.id)}
+                              placeholder="Type a skill and press Enter or click Add…"
+                              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs focus:border-electric-blue focus:outline-none transition-all"
+                            />
+                            <button
+                              onClick={() => addSkillToCategory(cat.id)}
+                              className="px-4 py-2 bg-electric-blue/20 border border-electric-blue/40 text-electric-blue font-bold text-[10px] uppercase rounded-lg hover:bg-electric-blue/30 transition-all"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {(data.skills || []).length === 0 && (
+                        <div className="text-center py-16 text-white/20">
+                          <p className="text-4xl mb-2">🕸️</p>
+                          <p className="uppercase tracking-widest text-[10px]">No skill categories yet. Click "+ Add Category" to start.</p>
+                        </div>
+                      )}
+
                       <SaveBar onSave={triggerSave} onClear={triggerClear} saved={savedFlag} />
                     </div>
                   )}
