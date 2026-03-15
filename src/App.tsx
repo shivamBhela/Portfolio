@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 // Components
@@ -8,23 +8,16 @@ import ZibbiBot from './chatbot/ZibbiBot';
 
 // Animations
 import ScrollCinematic from './animations/ScrollCinematic';
-
-// Sections (Lazy Loaded for performance)
-const Hero = lazy(() => import('./sections/Hero'));
-const About = lazy(() => import('./sections/About'));
-const Skills = lazy(() => import('./sections/Skills'));
-const Projects = lazy(() => import('./sections/Projects'));
-const Research = lazy(() => import('./sections/Timeline'));
-const Hackathons = lazy(() => import('./sections/Hackathons'));
-const Certificates = lazy(() => import('./sections/Certificates'));
-const GithubActivity = lazy(() => import('./sections/GithubActivity'));
-const AdminPanel = lazy(() => import('./admin/AdminPanel'));
-
-const SectionLoader = () => (
-  <div className="h-24 flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-spidey-red border-t-transparent rounded-full animate-spin" />
-  </div>
-);
+// Sections
+import Hero from './sections/Hero';
+import About from './sections/About';
+import Skills from './sections/Skills';
+import Projects from './sections/Projects';
+import Research from './sections/Timeline';
+import Hackathons from './sections/Hackathons';
+import Certificates from './sections/Certificates';
+import GithubActivity from './sections/GithubActivity';
+import AdminPanel from './admin/AdminPanel';
 
 const Contact = () => (
   <section id="contact" className="relative py-20 md:py-28 flex flex-col items-center justify-center overflow-hidden">
@@ -85,24 +78,20 @@ function App() {
 
         <div className="relative z-10">
           <div className="container mx-auto px-4 max-w-6xl">
-            <Suspense fallback={<SectionLoader />}>
-              <Hero />
-              <About />
-              <Skills />
-              <Projects />
-              <Research />
-              <Hackathons />
-              <Certificates />
-              <GithubActivity />
-              <Contact />
-            </Suspense>
+            <Hero />
+            <About />
+            <Skills />
+            <Projects />
+            <Research />
+            <Hackathons />
+            <Certificates />
+            <GithubActivity />
+            <Contact />
           </div>
         </div>
 
         <ZibbiBot />
-        <Suspense fallback={null}>
-          <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
-        </Suspense>
+        <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
       </motion.div>
     </main>
   );

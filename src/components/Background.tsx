@@ -71,7 +71,7 @@ const Background = () => {
         <pointLight position={[10, 10, 10]} intensity={1} color="#ff0000" />
         <pointLight position={[-10, -10, -10]} intensity={1} color="#003767" />
         
-        <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         
         <WebMesh />
         
