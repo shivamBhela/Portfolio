@@ -131,8 +131,8 @@ const Hackathons = () => {
                     </div>
                     <div>
                       <h4 className="text-[10px] uppercase tracking-widest font-black text-white/40 mb-2">Project Details</h4>
-                      <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-white/60">
-                         Full implementation details and gallery views of the solution.
+                      <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-white/60 whitespace-pre-wrap">
+                         {selectedHack.longDescription || "Full implementation details and gallery views of the solution."}
                       </div>
                     </div>
                   </div>

@@ -46,7 +46,7 @@ const Hero = () => {
           <span className="block -mt-4 md:-mt-8 text-spidey-red">Everyone</span>
         </h1>
 
-        <div className="max-w-2xl mx-auto backdrop-blur-sm bg-white/5 p-6 rounded-2xl border border-white/10">
+        <div className="max-w-2xl mx-auto bg-white/5 p-6 rounded-2xl border border-white/10">
           <p className="text-sm md:text-base font-bold text-white/60 uppercase tracking-[0.3em] leading-relaxed">
             {data.about.heroSubtitle || data.about.title}
           </p>
@@ -58,7 +58,7 @@ const Hero = () => {
           transition={{ delay: 0.8 }}
           className="flex flex-wrap items-center justify-center gap-6 mt-12"
         >
-          <button className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-black tracking-widest uppercase rounded-sm transition-all hover:bg-white/20 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] active:scale-95">
+          <button className="px-10 py-4 bg-white/10 border border-white/20 text-white font-black tracking-widest uppercase rounded-sm transition-all hover:bg-white/20 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] active:scale-95">
             Explore My Work
           </button>
         </motion.div>

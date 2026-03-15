@@ -26,7 +26,9 @@ const INITIAL_DATA = {
       image: ASSETS.images.defaultCard,
       tags: ['Arduino', 'Python', 'C++', 'Signal Processing', 'EEG Sensors'],
       github: 'https://github.com/shivamBhela',
-      demo: '#'
+      demo: '#',
+      longDescription: 'Detailed description of the EEG Controlled VR Engine project.',
+      gallery: []
     }
   ],
   hackathons: [
@@ -126,7 +128,25 @@ export const usePortfolioData = () => {
 
   useEffect(() => {
     localStorage.setItem('shivam_portfolio_data', JSON.stringify(data));
+    window.dispatchEvent(new Event('portfolio_data_updated'));
   }, [data]);
+
+  useEffect(() => {
+    const handleDataUpdate = () => {
+      try {
+        const saved = localStorage.getItem('shivam_portfolio_data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setData(parsed);
+        }
+      } catch (error) {
+        console.error("Failed to parse portfolio data update", error);
+      }
+    };
+
+    window.addEventListener('portfolio_data_updated', handleDataUpdate);
+    return () => window.removeEventListener('portfolio_data_updated', handleDataUpdate);
+  }, []);
 
   const updateSection = (section: string, newData: any) => {
     setData((prev: any) => ({

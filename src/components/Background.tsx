@@ -21,10 +21,16 @@ const WebMesh = () => {
     return temp;
   }, [count]);
 
+  const positions = useMemo(() => {
+    return new Float32Array(particles.flatMap(p => [p.xFactor, p.yFactor, p.zFactor, 0, 0, 0]));
+  }, [particles]);
+
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
     if (meshRef.current) {
+      // Smooth continuous rotation instead of heavy individual <Float> renders
       meshRef.current.rotation.y = time * 0.1;
+      meshRef.current.position.y = Math.sin(time * 0.5) * 2;
       meshRef.current.rotation.x = state.mouse.y * 0.2;
       meshRef.current.rotation.z = state.mouse.x * 0.2;
     }
@@ -32,14 +38,14 @@ const WebMesh = () => {
 
   return (
     <group ref={meshRef}>
-      {particles.map((p, i) => (
-        <Float key={i} speed={p.speed * 10} rotationIntensity={2} floatIntensity={2}>
-          <mesh position={[p.xFactor, p.yFactor, p.zFactor]}>
-            <sphereGeometry args={[0.1, 16, 16]} />
+      <group>
+        {particles.map((p, i) => (
+          <mesh key={i} position={[p.xFactor, p.yFactor, p.zFactor]}>
+            <sphereGeometry args={[0.1, 8, 8]} />
             <meshStandardMaterial color="#00f2ff" emissive="#00f2ff" emissiveIntensity={2} />
           </mesh>
-        </Float>
-      ))}
+        ))}
+      </group>
       
       {/* Web connecting lines */}
       <lineSegments>
@@ -47,8 +53,7 @@ const WebMesh = () => {
            <bufferAttribute 
               attach="attributes-position"
               count={particles.length * 2}
-              array={new Float32Array(particles.flatMap(p => [p.xFactor, p.yFactor, p.zFactor, 0, 0, 0]))}
-              itemSize={3}
+              args={[positions, 3]}
            />
         </bufferGeometry>
         <lineBasicMaterial color="#ffffff" transparent opacity={0.1} />

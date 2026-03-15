@@ -45,26 +45,28 @@ canvas {
 /* Modern card: Apple/Stripe-style */
 .holographic-card {
   background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform, border-color, box-shadow;
 }
 .holographic-card:hover {
   border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* Portrait card: holographic shimmer + hover glow */
 .portrait-card {
   animation: portrait-float 6s ease-in-out infinite;
+  will-change: transform, box-shadow;
 }
 .portrait-card:hover {
   box-shadow:
-    0 0 20px rgba(177, 19, 19, 0.3),
-    0 0 40px rgba(0, 242, 255, 0.15),
-    0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    0 0 15px rgba(177, 19, 19, 0.2),
+    0 0 30px rgba(0, 242, 255, 0.1),
+    0 8px 24px 0 rgba(0, 0, 0, 0.3);
   border-color: rgba(255, 255, 255, 0.2);
 }
 .portrait-card::after {

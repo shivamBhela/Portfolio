@@ -1,10 +1,11 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { usePortfolioData } from '../hooks/usePortfolioData';
 
 const Projects = () => {
   const { data } = usePortfolioData();
   const projects = data.projects;
+  const [selectedProject, setSelectedProject] = useState<any>(null);
 
   return (
     <section id="projects" className="relative min-h-screen py-20 md:py-28 overflow-hidden">
@@ -30,6 +31,7 @@ const Projects = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               viewport={{ once: true }}
+              onClick={() => setSelectedProject(project)}
               className="group relative min-h-[320px] md:min-h-[400px] rounded-2xl overflow-hidden cursor-pointer"
             >
               {/* Background Image */}
@@ -75,6 +77,7 @@ const Projects = () => {
                       href={project.github} 
                       target="_blank" 
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                       className={`text-xs uppercase tracking-[0.2em] font-bold border-b border-white hover:border-spidey-red hover:text-spidey-red transition-all ${project.github === '#' ? 'opacity-30 pointer-events-none' : ''}`}
                     >
                       {project.github === '#' ? 'Repo Locked' : 'Source Code'}
@@ -83,6 +86,7 @@ const Projects = () => {
                       href={project.demo} 
                       target="_blank" 
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                       className={`text-xs uppercase tracking-[0.2em] font-bold border-b border-white hover:border-electric-blue hover:text-electric-blue transition-all ${project.demo === '#' ? 'opacity-30 pointer-events-none' : ''}`}
                     >
                       {project.demo === '#' ? 'Demo Offline' : 'Live Demo'}
@@ -96,6 +100,86 @@ const Projects = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Gallery / Detail Modal */}
+        <AnimatePresence>
+          {selectedProject && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+              onClick={() => setSelectedProject(null)}
+            >
+              <div 
+                className="w-full max-w-4xl max-h-[90vh] overflow-y-auto holographic-card rounded-2xl p-8 space-y-8"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter">{selectedProject.title}</h2>
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {selectedProject.tags.map((tag: string) => (
+                        <span key={tag} className="text-[10px] uppercase tracking-widest font-bold text-electric-blue bg-electric-blue/10 border border-electric-blue/20 px-2 py-0.5 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedProject(null)} className="text-white/40 hover:text-white text-2xl">✕</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-[10px] uppercase tracking-widest font-black text-white/40 mb-2">Project Overview</h4>
+                      <p className="text-white/70 leading-relaxed italic">"{selectedProject.description}"</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] uppercase tracking-widest font-black text-white/40 mb-2">Implementation Details</h4>
+                      <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-white/60 whitespace-pre-wrap">
+                         {selectedProject.longDescription || "Detailed description coming soon."}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-6 pt-4">
+                      <a 
+                        href={selectedProject.github} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`px-6 py-2 bg-spidey-red text-white text-xs uppercase tracking-[0.2em] font-bold rounded hover:shadow-[0_0_15px_rgba(177,19,19,0.5)] transition-all ${selectedProject.github === '#' ? 'opacity-30 pointer-events-none' : ''}`}
+                      >
+                        {selectedProject.github === '#' ? 'Locked' : 'View Code'}
+                      </a>
+                      <a 
+                        href={selectedProject.demo} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`text-xs uppercase tracking-[0.2em] font-bold border-b border-white hover:border-electric-blue hover:text-electric-blue transition-all ${selectedProject.demo === '#' ? 'opacity-30 pointer-events-none' : ''}`}
+                      >
+                        {selectedProject.demo === '#' ? 'Offline' : 'Live Demo'}
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] uppercase tracking-widest font-black text-white/40">Gallery</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                       <div className="aspect-video bg-white/5 rounded-lg overflow-hidden border border-white/10">
+                          <img src={selectedProject.image} className="w-full h-full object-cover" alt="Main cover" />
+                       </div>
+                       {selectedProject.gallery?.map((img: string, i: number) => (
+                         <div key={i} className="aspect-video bg-white/5 rounded-lg overflow-hidden border border-white/10">
+                            <img src={img} className="w-full h-full object-cover" alt={`Gallery item ${i}`} />
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

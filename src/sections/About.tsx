@@ -52,12 +52,12 @@ const About = () => {
               {/* Portrait image */}
               <div className="aspect-[4/5] relative overflow-hidden">
                 <motion.img
-                  src={ASSETS.images.heroEdited}
-                  alt="Shivam Bhela"
+                  src={data.about.profileImage || ASSETS.images.profile}
+                  alt={data.about.name}
                   className="w-full h-full object-cover object-center transition-all duration-700 scale-110 group-hover:scale-105"
-                  initial={{ filter: 'brightness(0.6) saturate(0.4)' }}
-                  whileInView={{ filter: 'brightness(0.85) saturate(0.7)' }}
-                  whileHover={{ filter: 'brightness(1) saturate(1.1)' }}
+                  initial={{ opacity: 0.8 }}
+                  whileInView={{ opacity: 0.95 }}
+                  whileHover={{ opacity: 1 }}
                   transition={{ duration: 0.8 }}
                 />
 

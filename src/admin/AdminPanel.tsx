@@ -294,7 +294,7 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   {/* ── Projects ─────────────────────────────────────────── */}
                   {activeTab === 'projects' && (
                     <div className="space-y-4">
-                      <SectionHeader title="Project" accent="Deployments" onAdd={() => addItem('projects', { title: 'New Project', description: '', image: '', tags: [], github: '#', demo: '#' })} />
+                      <SectionHeader title="Project" accent="Deployments" onAdd={() => addItem('projects', { title: 'New Project', description: '', longDescription: '', image: '', tags: [], github: '#', demo: '#', gallery: [] })} />
                       {data.projects.map((proj: any) => (
                         <div key={proj.id} className="bg-white/5 p-6 rounded-xl border border-white/10 space-y-4">
                           <div className="flex gap-5">
@@ -305,7 +305,30 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                             </div>
                             <button onClick={() => removeItem('projects', proj.id)} className="text-spidey-red text-[10px] font-bold uppercase self-start">Delete</button>
                           </div>
-                          <textarea value={proj.description} placeholder="Project Description" onChange={e => editItem('projects', proj.id, { ...proj, description: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-xs focus:outline-none focus:border-electric-blue" />
+                          <textarea value={proj.description} placeholder="Short Description" onChange={e => editItem('projects', proj.id, { ...proj, description: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-xs focus:outline-none focus:border-electric-blue" />
+                          <textarea value={proj.longDescription || ''} placeholder="Long Description / Details" onChange={e => editItem('projects', proj.id, { ...proj, longDescription: e.target.value })} rows={3} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-xs focus:outline-none focus:border-electric-blue" />
+                          
+                          {/* Project Gallery */}
+                          <div className="space-y-2 pt-2 border-t border-white/10">
+                            <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Project Gallery</p>
+                            <div className="flex flex-wrap gap-2">
+                              {(proj.gallery || []).map((imgUrl: string, idx: number) => (
+                                <div key={idx} className="relative w-16 h-16 rounded bg-white/10 group overflow-hidden border border-white/10">
+                                  <img src={imgUrl} className="w-full h-full object-cover" alt="gallery" />
+                                  <button
+                                    onClick={() => editItem('projects', proj.id, { ...proj, gallery: proj.gallery.filter((_: any, i: number) => i !== idx) })}
+                                    className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-spidey-red text-xs font-bold"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                              <div className="w-16 h-16 rounded bg-white/5 border border-white/10 flex items-center justify-center relative group">
+                                <span className="text-white/20 text-xl font-black">+</span>
+                                <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e: any) => handleImageUpload(e, url => editItem('projects', proj.id, { ...proj, gallery: [...(proj.gallery || []), url] }))} />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <SaveBar onSave={triggerSave} onClear={triggerClear} saved={savedFlag} />
@@ -315,7 +338,7 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   {/* ── Hackathons ────────────────────────────────────────── */}
                   {activeTab === 'hackathons' && (
                     <div className="space-y-4">
-                      <SectionHeader title="Hackathon" accent="Records" onAdd={() => addItem('hackathons', { name: 'New Hackathon', problem: '', year: '2025', achievement: '', teamSize: 1, image: '', location: '', gallery: [] })} />
+                      <SectionHeader title="Hackathon" accent="Records" onAdd={() => addItem('hackathons', { name: 'New Hackathon', problem: '', longDescription: '', year: '2025', achievement: '', teamSize: 1, image: '', location: '', gallery: [] })} />
                       {data.hackathons.map((hack: any) => (
                         <div key={hack.id} className="bg-white/5 p-6 rounded-xl border border-white/10 flex gap-5">
                           <div className="shrink-0">
@@ -331,8 +354,33 @@ const AdminPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                               <input type="text" value={hack.location || ''} placeholder="Location" onChange={e => editItem('hackathons', hack.id, { ...hack, location: e.target.value })} className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] w-full" />
                             </div>
                             <textarea value={hack.problem} placeholder="Problem Statement" onChange={e => editItem('hackathons', hack.id, { ...hack, problem: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-xs focus:outline-none" />
+                            <textarea value={hack.longDescription || ''} placeholder="Implementation Details / Full Description" onChange={e => editItem('hackathons', hack.id, { ...hack, longDescription: e.target.value })} rows={3} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-xs focus:outline-none" />
                           </div>
-                          <button onClick={() => removeItem('hackathons', hack.id)} className="text-spidey-red text-[10px] font-bold uppercase self-start">Delete</button>
+                          
+                          <div className="shrink-0 flex flex-col gap-4">
+                            <button onClick={() => removeItem('hackathons', hack.id)} className="text-spidey-red text-[10px] font-bold uppercase self-end">Delete</button>
+                            {/* Hackathon Gallery */}
+                            <div className="space-y-2 mt-auto text-right">
+                              <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Gallery</p>
+                              <div className="flex flex-wrap gap-2 justify-end max-w-[140px]">
+                                {(hack.gallery || []).map((imgUrl: string, idx: number) => (
+                                  <div key={idx} className="relative w-12 h-12 rounded bg-white/10 group overflow-hidden border border-white/10">
+                                    <img src={imgUrl} className="w-full h-full object-cover" alt="gallery" />
+                                    <button
+                                      onClick={() => editItem('hackathons', hack.id, { ...hack, gallery: hack.gallery.filter((_: any, i: number) => i !== idx) })}
+                                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-spidey-red text-[10px] font-bold"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                                <div className="w-12 h-12 rounded bg-white/5 border border-white/10 flex items-center justify-center relative group">
+                                  <span className="text-white/20 text-lg font-black">+</span>
+                                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e: any) => handleImageUpload(e, url => editItem('hackathons', hack.id, { ...hack, gallery: [...(hack.gallery || []), url] }))} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <SaveBar onSave={triggerSave} onClear={triggerClear} saved={savedFlag} />
